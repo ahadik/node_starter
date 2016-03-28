@@ -2,7 +2,6 @@ var express = require('express'),
     cfenv = require('cfenv'),
     path = require('path'),
     bodyParser = require('body-parser'),
-    hello_world = require('./modules/final/hello-world'), //for demonstration purposes only
     fs;
 
 var app = express(),

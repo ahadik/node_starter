@@ -15,7 +15,8 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'),
     cfenv = require('cfenv'),
     gulpif = require('gulp-if'),
-    browserSync = require('browser-sync');
+    browserSync = require('browser-sync'),
+    babel = require('gulp-babel');
 
 //////////////////////////////
 // Variables
@@ -35,12 +36,17 @@ var dirs = {
   'server': {
     'main': 'index.js',
     'watch': [
-      'index.js'
+      'index.js',
+      'modules/src/**/*.js'
+    ],
+    'modules': [
+      'modules/src/**/*.js'
     ]
   },
   'sass': 'src/sass/**/*.scss',
   'images': 'src/images/**/*.*',
   'public': 'public/',
+  'modules': 'modules/final',
   'html': 'src/**/*.html'
 };
 
@@ -68,8 +74,19 @@ gulp.task('uglify', function () {
         'mangle': isCI ? true : false
       }))
     .pipe(gulpif(!isCI, sourcemaps.write('maps')))
+    .pipe(babel()) //No idea if this works. We'll find out!
     .pipe(gulp.dest(dirs.public + 'js'))
     .pipe(browserSync.stream());
+});
+
+gulp.task('node_es6', function(){
+  gulp.src(dirs.server.modules, {base : './modules/src/'})
+    .pipe(babel())
+    .pipe(gulp.dest(dirs.modules))
+});
+
+gulp.task('node_es6:watch', function(){
+  gulp.watch(dirs.server.watch, ['node_es6']);
 });
 
 gulp.task('eslint:watch', function () {
@@ -174,10 +191,10 @@ gulp.task('browser-sync', ['nodemon'], function () {
 //////////////////////////////
 // Running Tasks
 //////////////////////////////
-gulp.task('build', ['uglify', 'html', 'sass', 'images']);
+gulp.task('build', ['uglify', 'html', 'sass', 'images', 'node_es6']);
 
 gulp.task('test', ['build']);
 
-gulp.task('watch', ['eslint:watch', 'uglify:watch', 'html:watch', 'sass:watch', 'images:watch']);
+gulp.task('watch', ['eslint:watch', 'uglify:watch', 'html:watch', 'sass:watch', 'images:watch', 'node_es6:watch']);
 
 gulp.task('default', ['browser-sync', 'build', 'watch']);
