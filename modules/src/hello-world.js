@@ -6,5 +6,5 @@ exports.hello = function(){
 
 exports.es6 = function(){
 	var [a,b] = [1,2];
-	[a,b] = [b,a];
+	[a,b] = [b,a]; //take a look at the es5 this transpiles to in /modules/final
 }

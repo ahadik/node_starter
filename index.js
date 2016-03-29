@@ -5,6 +5,8 @@ var express = require('express'),
     hello_world = require('./modules/final/hello-world'), //for demonstration purposes only
     fs;
 
+require('source-map-support').install();
+
 var app = express(),
     appEnv = cfenv.getAppEnv();
 

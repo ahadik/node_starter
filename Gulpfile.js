@@ -81,7 +81,9 @@ gulp.task('uglify', function () {
 
 gulp.task('node_es6', function(){
   gulp.src(dirs.server.modules, {base : './modules/src/'})
+    .pipe(gulpif(!isCI, sourcemaps.init()))
     .pipe(babel())
+    .pipe(gulpif(!isCI, sourcemaps.write('.')))
     .pipe(gulp.dest(dirs.modules))
 });
 
