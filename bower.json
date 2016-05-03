@@ -16,6 +16,5 @@
   "dependencies": {
   },
   "devDependencies": {
-    "ibm-colors": "~1.4.0"
   }
 }
