@@ -14,6 +14,8 @@ var gulp = require('gulp'),
     sasslint = require('gulp-sass-lint'),
     imagemin = require('gulp-imagemin'),
     cfenv = require('cfenv'),
+    webpack = require('webpack'),
+    gutil = require('gulp-util'),
     gulpif = require('gulp-if'),
     browserSync = require('browser-sync'),
     babel = require('gulp-babel');
@@ -24,29 +26,26 @@ var gulp = require('gulp'),
 var dirs = {
   'js': {
     'lint': [
-      'index.js',
+      'app.js',
       'src/**/*.js',
+      'modules/**/*.js',
       '!src/**/*.min.js'
     ],
-    'uglify': [
-      'src/js/**/*.js',
-      '!src/js/**/*.min.js'
-    ]
-  },
-  'server': {
-    'main': 'index.js',
-    'watch': [
-      'index.js',
-      'modules/src/**/*.js'
-    ],
-    'modules': [
-      'modules/src/**/*.js'
-    ]
+    'client': {
+      'main':'./src/js/script.js',
+      'watch':'./src/**/*.js'
+    },
+    'server': {
+      'main': './app.js',
+      'watch': [
+        'app.js',
+        'modules/**/*.js'
+      ]
+    }
   },
   'sass': 'src/sass/**/*.scss',
-  'images': 'src/images/**/*.*',
+  'images': {'imgs': 'src/imgs/**/*', 'icons' : 'src/icons/**/*'},
   'public': 'public/',
-  'modules': 'modules/final',
   'html': 'src/**/*.html'
 };
 
@@ -60,6 +59,80 @@ browserSync = browserSync.create();
 //////////////////////////////
 // JavaScript Lint Tasks
 //////////////////////////////
+
+//Pack all client side JS
+gulp.task('client-pack', (cb) => {
+  webpack({
+    devtool: 'source-maps',
+    entry: dirs.js.client.main,
+    output: {
+      path: './public/js',
+      filename: 'script.js'
+    },
+    module: {
+      loaders: [
+        {
+          test: /\.js?$/,
+          exclude: /node_modules/,
+          loaders: ['babel'],
+        },
+      ],
+    },
+    plugins: [new webpack.optimize.UglifyJsPlugin()],
+  }, (err, stats) => {
+    if (err) throw new gutil.PluginError('webpack', err);
+    gutil.log('[webpack]', stats.toString({
+      progress: true,
+      colors: true
+    }));
+    browserSync.reload();
+    cb();
+  });
+});
+
+//watch all client side JS and trigger client-side pack on change
+gulp.task('client-pack:watch', function(){
+  gulp.watch(dirs.js.client.watch, ['client-pack']);
+});
+
+var nodeExternals = require('webpack-node-externals');
+
+//Pack all server side JS
+gulp.task('server-pack', (cb) => {
+  webpack({
+    devtool: 'source-maps',
+    'target':'node',
+    externals: [nodeExternals()],
+    entry: dirs.js.server.main,
+    output: {
+      path: './',
+      filename: 'index.js'
+    },
+    module: {
+      loaders: [
+        {
+          test: /\.js?$/,
+          exclude: /node_modules/,
+          loaders: ['babel'],
+        },
+      ],
+    }
+  }, (err, stats) => {
+    if (err) throw new gutil.PluginError('webpack', err);
+    gutil.log('[webpack]', stats.toString({
+      progress: true,
+      colors: true
+    }));
+    cb();
+  });
+});
+
+//watch all server side JS and trigger server-side pack on change
+gulp.task('server-pack:watch', function(){
+  gulp.watch(dirs.js.server.watch, ['server-pack']);
+});
+
+//Run the linter on all files marked for linting
 gulp.task('eslint', function () {
   gulp.src(dirs.js.lint)
     .pipe(eslint())
@@ -67,36 +140,8 @@ gulp.task('eslint', function () {
     .pipe(gulpif(isCI, eslint.failOnError()));
 });
 
-gulp.task('uglify', function () {
-  gulp.src(dirs.js.uglify)
-    .pipe(gulpif(!isCI, sourcemaps.init()))
-      .pipe(uglify({
-        'mangle': isCI ? true : false
-      }))
-    .pipe(gulpif(!isCI, sourcemaps.write('maps')))
-    .pipe(babel()) //No idea if this works. We'll find out!
-    .pipe(gulp.dest(dirs.public + 'js'))
-    .pipe(browserSync.stream());
-});
-
-gulp.task('node_es6', function(){
-  gulp.src(dirs.server.modules, {base : './modules/src/'})
-    .pipe(gulpif(!isCI, sourcemaps.init()))
-    .pipe(babel())
-    .pipe(gulpif(!isCI, sourcemaps.write('.')))
-    .pipe(gulp.dest(dirs.modules))
-});
-
-gulp.task('node_es6:watch', function(){
-  gulp.watch(dirs.server.watch, ['node_es6']);
-});
-
 gulp.task('eslint:watch', function () {
   gulp.watch(dirs.js.lint, ['eslint']);
-});
-
-gulp.task('uglify:watch', function () {
-  gulp.watch(dirs.js.uglify, ['uglify']);
 });
 
 //////////////////////////////
@@ -124,6 +169,9 @@ gulp.task('sass', function () {
     .pipe(gulpif(!isCI, sourcemaps.init()))
       .pipe(sass({
         'outputStyle': isCI ? 'expanded' : 'compressed',
+        'includePaths': [
+          'bower_components/**/*'
+        ],
         'importer': importOnce,
         'importOnce': {
           'index': true,
@@ -145,18 +193,27 @@ gulp.task('sass:watch', function () {
 // Image Tasks
 //////////////////////////////
 gulp.task('images', function () {
-  gulp.src(dirs.images)
+  gulp.src(dirs.images.imgs)
     .pipe(imagemin({
       'progressive': true,
       'svgoPlugins': [
         { 'removeViewBox': false }
       ]
     }))
-    .pipe(gulp.dest(dirs.public + '/images'));
+    .pipe(gulp.dest(dirs.public + '/imgs'));
+
+    gulp.src(dirs.images.icons)
+    .pipe(imagemin({
+      'progressive': true,
+      'svgoPlugins': [
+        { 'removeViewBox': false }
+      ]
+    }))
+    .pipe(gulp.dest(dirs.public + '/icons'));
 });
 
 gulp.task('images:watch', function () {
-  gulp.watch(dirs.images, ['images']);
+  gulp.watch([dirs.images.imgs, dirs.images.icons], ['images']);
 });
 
 //////////////////////////////
@@ -164,8 +221,8 @@ gulp.task('images:watch', function () {
 //////////////////////////////
 gulp.task('nodemon', function (cb) {
   nodemon({
-    'script': dirs.server.main,
-    'watch': dirs.server.watch,
+    'script': dirs.js.server.main,
+    'watch': dirs.js.server.watch,
     'env': {
       'NODE_ENV': 'development'
     }
@@ -185,7 +242,7 @@ gulp.task('browser-sync', ['nodemon'], function () {
   var appEnv = cfenv.getAppEnv();
   appEnv.url = 'http://localhost:3000/';
   browserSync.init({
-	port: 8000,
+  port: 8000,
     'proxy': appEnv.url
   });
 });
@@ -193,10 +250,10 @@ gulp.task('browser-sync', ['nodemon'], function () {
 //////////////////////////////
 // Running Tasks
 //////////////////////////////
-gulp.task('build', ['uglify', 'html', 'sass', 'images', 'node_es6']);
+gulp.task('build', ['client-pack', 'server-pack', 'eslint', 'html', 'sass', 'images']);
 
 gulp.task('test', ['build']);
 
-gulp.task('watch', ['eslint:watch', 'uglify:watch', 'html:watch', 'sass:watch', 'images:watch', 'node_es6:watch']);
+gulp.task('watch', ['client-pack:watch', 'server-pack:watch', 'eslint:watch', 'html:watch', 'sass:watch', 'images:watch']);
 
 gulp.task('default', ['browser-sync', 'build', 'watch']);
