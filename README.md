@@ -2,7 +2,7 @@
 ##All the code and configuration you need for a Node project with modern tooling
 
 ###What This Is
-Any basic web project needs some basic modern tooling to make your work faster. The tools provided in this project the web-dev community has aligned around, namely:
+Any basic web project needs some basic modern tooling to make your work faster. The are the tools the web-dev community has aligned around, namely:
 
 - [x] [Gulp](http://gulpjs.com/): Automate basic repetitive tasks, namely the ones listed below.
 - [x] [Bower](http://bower.io/): Package manager to download and manage front-end dependencies.
@@ -15,7 +15,7 @@ Any basic web project needs some basic modern tooling to make your work faster. 
 - [x] [Uglify](https://github.com/mishoo/UglifyJS2): Minify your front-end Javascript for performance.
 - [x] [Sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps): Map all these transpiled changes back to your original code for debugging.
 
-Downloading and running the code in this repository, as explained below, will set up these tools for you automatically. You can then dive into your project just as you always would, but now with supecharged tools and capabilities.
+Downloading and running the code in this repository, as explained below, will set up these tools for you automatically. You can then dive into your project just as you always would, but now with super-charged tools and capabilities.
 
 ###Installation
 Clone this repository (`git clone git@github.com:ahadik/node_starter.git`) to start your project. Install dependencies with `npm install`.
@@ -50,7 +50,7 @@ There are some key files and directories to know about:
 ###Using
 Once `gulp` runs successfully with out errors (a few Sass Lint warnings may be produced due to typography styling), a browser window will be opened automatically displaying `index.html`.
 
-If you make changes to any front-end file, such the text of `index.html`, or the Sass itself, Gulp will automatically re-run and Browser-Sync will reload the webpage for you, provided you have loaded the page on port 8000.
+If you make changes to any front-end file, such as the text of `index.html`, or the Sass itself, Gulp will automatically re-run and Browser-Sync will reload the webpage for you, provided you have loaded the page on port 8000.
 
 If you make changes to any back-end file, such as `app.js`, Gulp will rebuild the code and Nodemon will restart your Node server.
 
