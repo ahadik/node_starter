@@ -31,3 +31,6 @@ bower_components
 
 # Public folder
 public
+
+# Private Directory
+private
