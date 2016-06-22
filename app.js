@@ -24,9 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-app.get('/', function(req, res){
-    res.send('index.html');
-});
+require('./modules/routes/index.js')(app, {}); // load our routes and pass in our app and fully configured passport
 
 app.listen(app.get('port'), function() {
     console.info('Server listening on port ' + this.address().port);
