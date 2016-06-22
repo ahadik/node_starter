@@ -45,7 +45,6 @@ var dirs = {
   },
   'sass': 'src/sass/**/*.scss',
   'images': {'imgs': 'src/imgs/**/*', 'icons' : 'src/icons/**/*'},
-  'public': 'public/',
   'html': 'src/**/*.html'
 };
 

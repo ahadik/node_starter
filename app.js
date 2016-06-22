@@ -5,8 +5,10 @@ var express = require('express'),
     cfenv = require('cfenv'),
     path = require('path'),
     bodyParser = require('body-parser'),
+    queryParser = require('query-parser'),
     hello_world = require('./modules/hello-world'), //for demonstration purposes only
-    fs;
+    fs,
+    URL = require('url-parse');
 
 var app = express(),
     appEnv = cfenv.getAppEnv();
@@ -24,7 +26,7 @@ app.use(bodyParser.json());
 
 app.get('/', function(req, res){
     res.send('index.html');
-})
+});
 
 app.listen(app.get('port'), function() {
     console.info('Server listening on port ' + this.address().port);
