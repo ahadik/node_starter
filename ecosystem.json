@@ -1,0 +1,37 @@
+{
+  /**
+   * Application configuration section
+   * http://pm2.keymetrics.io/docs/usage/application-declaration/
+   */
+  apps : [
+
+    // First application
+    {
+      name      : "My App",
+      script    : "index.js",
+      env: {
+        TEST_VAR: "Hello World"
+      },
+      env_production : {
+        NODE_ENV: "production"
+      }
+    }
+  ],
+
+  /**
+   * Deployment section
+   * http://pm2.keymetrics.io/docs/usage/deployment/
+   */
+  deploy : {
+    production : {
+      //update this section!
+      user : "root",
+      host : "0.0.0.0",
+      ref  : "origin/master",
+      repo : "git@github.com:ahadik/repo",
+      path : "/root/app",
+      "pre-deploy-local" : "echo 'This is a local executed command'",
+      "post-deploy" : "npm install pm2 -g && npm install bower -g && npm install gulp -g && npm install --unsafe-perm && gulp build && pm2 startOrRestart ecosystem.json --env production"
+    }
+  }
+}
