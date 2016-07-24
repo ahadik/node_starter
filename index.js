@@ -60,16 +60,20 @@
 	var app = express(),
 	    appEnv = cfenv.getAppEnv();
 	
+	if (process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'staging') {
+	    app.set('port', process.env.VCAP_APP_PORT || 80);
+	} else {
+	    app.set('port', 3000);
+	}
+	
 	app.use(express.static(path.join(__dirname, 'public')));
 	//app.set(path.join('views', __dirname, '/apps'));
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
 	
-	app.get('/', function (req, res) {
-	    res.send('index.html');
-	});
+	__webpack_require__(8)(app, {}); // load our routes and pass in our app and fully configured passport
 	
-	app.listen(3000, function () {
+	app.listen(app.get('port'), function () {
 	    console.info('Server listening on port ' + this.address().port);
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, "/"))
@@ -131,6 +135,21 @@
 		var _ref = [b, a];
 		a = _ref[0];
 		b = _ref[1];
+	};
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	module.exports = function (app, credentials) {
+	    var path = __webpack_require__(5);
+	    var __dirname = path.resolve(path.dirname());
+	
+	    app.get('/', function (req, res) {
+	        res.sendFile(__dirname + '/public/index.html');
+	    });
 	};
 
 /***/ }

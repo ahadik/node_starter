@@ -5,10 +5,8 @@ var express = require('express'),
     cfenv = require('cfenv'),
     path = require('path'),
     bodyParser = require('body-parser'),
-    queryParser = require('query-parser'),
     hello_world = require('./modules/hello-world'), //for demonstration purposes only
-    fs,
-    URL = require('url-parse');
+    fs;
 
 var app = express(),
     appEnv = cfenv.getAppEnv();
