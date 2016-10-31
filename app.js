@@ -18,6 +18,7 @@ if(process.env.NODE_ENV == 'production' || process.env.NODE_ENV == 'staging'){
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/bower_components',    express.static('bower_components'));
 //app.set(path.join('views', __dirname, '/apps'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
